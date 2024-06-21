@@ -102,7 +102,8 @@ class EllipticCurve:
     #will define it as dP but can still be used to hop from custom points
     #coords_1 should be set to 
     def iterate_points_manual(self, coords_1):
-        hash_E_est = round(self.p + 1 + 2*np.sqrt(self.p))
+        #hash_E_est = round(self.p + 1 + 2*np.sqrt(self.p))
+        hash_E_est = 2**128
         manual_coords_3 = []
         hash_E = []
         manual_coords_3.append(coords_1)
@@ -137,19 +138,32 @@ class EllipticCurve:
 #Variables
 #elliptical curves defined by y^2 = x^3 +ax + b modp
 #This is the curve used in Understanding Cryptography Christof Paar
-domain_point = (5,1)
-a = 2  
-b = 2
-p = 17  
+
+#For the NIST P256 curve, we have a finite field defined by the prime number of 
+p=2**256 - 2**224 + 2**192+2**96 - 1
+a=-3
+b=41058363725152142129326129780047268409114441015993725554835256314039467401291
+domain_point = (48439561293906451759052585252797914202762949526041747995844080717082404635286,36134250956749795798585127919587881956611106672985015071877198253568414405109)
+
+#domain_point = (5,1)
+#a = 2  
+#b = 2
+#p = 17  
 
 curve = EllipticCurve(a, b, p, domain_point)
 
-curve.plot_curve(x_range = (-10, 10), y_range = (-10, 10))
-curve.plot_curve_mod(p=17)
+#curve.plot_curve(x_range = (-10, 10), y_range = (-10, 10))
+#curve.plot_curve_mod(p=17)
 #this is manual iteration with just addition, keep coords to domain point to start from beginning
 #set d to a big number to catch them all, could definitely set it to the upper bound of Hasse's Theorem
 manual_iteration_coords, hash_E = curve.iterate_points_manual(coords_1 = domain_point)  # Iterate 19 times just through adding
-curve.plot_iterated_points(points=manual_iteration_coords, hash_E = hash_E)
+#curve.plot_iterated_points(points=manual_iteration_coords, hash_E = hash_E)
 # Made a good staging area where we can look at curves
 # look at the number of steps through this - not feasible when we use large numbers
 # next will be to select and begin our encryption, New class!
+
+#For the NIST P256 curve, we have a finite field defined by the prime number of 
+#p=2**256−2**224+2**192+2**96−1. 
+#x=-3, 
+#b=41058363725152142129326129780047268409114441015993725554835256314039467401291
+#domain_point = (48439561293906451759052585252797914202762949526041747995844080717082404635286,36134250956749795798585127919587881956611106672985015071877198253568414405109).
