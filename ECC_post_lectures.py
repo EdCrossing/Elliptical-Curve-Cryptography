@@ -60,12 +60,10 @@ class EllipticCurve:
         x2, y2 = coords_2
         numerator = y2 - y1
         denominator = x2 - x1
-        
         try:
             denominator_inv = pow(denominator, -1, self.p)
         except ValueError:
-            raise ValueError(f"{script_O} addition failed")
-        
+            raise ValueError(f"{script_O} - addition failed")
         s = (numerator * denominator_inv) % self.p
         return s
     
@@ -83,43 +81,46 @@ class EllipticCurve:
         return s
     
     def point_add(self, coords_1, coords_2):
-        #this needs to be replaced with the binary part
+        coords = (0,0)
+        x3, y3 = (0,0)
         if coords_1 == coords_2:
-            s = self.s_d(coords_1)
+            coords = self.point_double(coords=coords_1)
         else:
-            s = self.s_a(coords_1, self.domain_point)
-        
-        x1, y1 = coords_1
-        x2, y2 = self.domain_point
-        
+            s = self.s_a(coords_1, coords_2)
+            x2, y2 = coords_2
+            x1, y1 = coords_1
+            x3 = (s**2 - x1 - x2) % self.p
+            y3 = (s * (x1 - x3) - y1) % self.p
+            coords = (x3, y3)  
+        return coords
+
+    def point_double(self, coords):
+        s = self.s_d(coords)
+        x1, y1 = coords
+        x2, y2 = coords
         x3 = (s**2 - x1 - x2) % self.p
         y3 = (s * (x1 - x3) - y1) % self.p
-        
-        coords_3 = (x3, y3)
-        return coords_3
-    
-    #this manually adds up to n not using the algo in the textbook, start from coords_1 = Primitive element 
-    #will define it as dP but can still be used to hop from custom points
-    #coords_1 should be set to 
+        coords = (x3, y3)
+        return coords
+
     def iterate_points_manual(self, coords_1):
         #just setting it big rather than using Hasse's theorem
-        #hash_E_est = round(self.p + 1 + 2*np.sqrt(self.p))
-        hash_E_est = 2**128
-        manual_coords_3 = []
+        hash_E_est = round(self.p + 1 + 2*np.sqrt(self.p))
+        manual_coords = []
         hash_E = []
-        manual_coords_3.append(coords_1)
-        print(f"P: {manual_coords_3}")
+        manual_coords.append(coords_1)
+        print(f"P: {manual_coords[0]}")
         for i in range(hash_E_est):
             try:
-                new_coords = self.point_add(coords_1, self.domain_point)
+                new_coords = self.point_add(coords_1=manual_coords[i], coords_2=self.domain_point)
                 print(f"{i+2}P: {new_coords}")
-                manual_coords_3.append(new_coords)
+                manual_coords.append(new_coords)
                 coords_1 = new_coords
             except ValueError as e:
                 print(f"Iteration {i + 2}: {str(e)}")
                 hash_E.append(i+2)
                 break
-        return manual_coords_3, hash_E
+        return manual_coords, hash_E
 
     def plot_iterated_points(self, points, hash_E):
 
@@ -136,9 +137,35 @@ class EllipticCurve:
             plt.gca().set_aspect('equal', adjustable='box')
             plt.show()
 
-#Variables
-#elliptical curves defined by y^2 = x^3 +ax + b modp
+    def gen_pubkey(self, prv_key):
+        binary = [int(d) for d in str(bin(prv_key))[2:]]
+        coords = self.domain_point
+        for i in range(1, len(binary)):
+            coords = self.point_double(coords)
+            if binary[i] == 1:
+                coords = self.point_add(coords, self.domain_point)
+        return coords
 
+    def gen_shared_secret(
+        self,
+        prv_key: int,
+        pub_key: tuple
+        ) -> tuple:
+        """
+        This function is doingthis
+
+        :param prv_key: this parameter is this
+        :param pub_key: this is this
+        :return: what it actually returns
+        """
+
+        binary = [int(d) for d in str(bin(prv_key))[2:]]
+        coords = pub_key
+        for i in range(1, len(binary)):
+            coords = self.point_double(coords)
+            if binary[i] == 1:
+                coords = self.point_add(coords, pub_key)
+        return coords
 
 #For the NIST P256 curve, we have a finite field defined by the prime number of 
 p=2**256 - 2**224 + 2**192+2**96 - 1
@@ -151,8 +178,7 @@ domain_point = (4843956129390645175905258525279791420276294952604174799584408071
 #a = 2  
 #b = 2
 #p = 17  
-
-curve = EllipticCurve(a, b, p, domain_point)
+#curve = EllipticCurve(a, b, p, domain_point)
 
 #for visualising the current curve
 #curve.plot_curve(x_range = (-10, 10), y_range = (-10, 10))
@@ -160,8 +186,14 @@ curve = EllipticCurve(a, b, p, domain_point)
 
 #this is manual iteration with just addition, keep coords to domain point to start from beginning
 #set d to a big number to catch them all, could definitely set it to the upper bound of Hasse's Theorem for smaller prime spaces
-manual_iteration_coords, hash_E = curve.iterate_points_manual(coords_1 = domain_point)  
-#curve.plot_iterated_points(points=manual_iteration_coords, hash_E = hash_E)
-# Made a good staging area where we can look at curves
-# look at the number of steps through this - not feasible when we use large numbers
-# next will be to select and begin our encryption, New class!
+#manual_iteration_coords, hash_E = curve.iterate_points_manual(coords_1 = domain_point)  
+
+curve = EllipticCurve(a, b, p, domain_point)
+alice_priv = 4
+bob_priv = 5
+alice_pub = curve.gen_pubkey(alice_priv)
+bob_pub = curve.gen_pubkey(bob_priv)
+
+alice_shared = curve.gen_shared_secret(alice_priv,bob_pub)
+bob_shared = curve.gen_shared_secret(bob_priv,alice_pub)
+
