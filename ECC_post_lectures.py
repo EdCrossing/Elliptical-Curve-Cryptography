@@ -4,6 +4,7 @@ script_O = "\U0001D4AA"
 # this code is to create a ECDH protocol
 #this exploits the DLP problem that is inherent to cyclicical groups that arise on elliptical curves in prime spaces
 
+
 #Implementing EC point addition and point doubling:
 #x_3 = s^2 - x_1 - x_2   mod p
 #y_3 = s(x_1 - x_3) - y_1 mod p 
@@ -151,13 +152,6 @@ class EllipticCurve:
         prv_key: int,
         pub_key: tuple
         ) -> tuple:
-        """
-        This function is doingthis
-
-        :param prv_key: this parameter is this
-        :param pub_key: this is this
-        :return: what it actually returns
-        """
 
         binary = [int(d) for d in str(bin(prv_key))[2:]]
         coords = pub_key
@@ -184,9 +178,6 @@ domain_point = (4843956129390645175905258525279791420276294952604174799584408071
 #curve.plot_curve(x_range = (-10, 10), y_range = (-10, 10))
 #curve.plot_curve_mod()
 
-#this is manual iteration with just addition, keep coords to domain point to start from beginning
-#set d to a big number to catch them all, could definitely set it to the upper bound of Hasse's Theorem for smaller prime spaces
-#manual_iteration_coords, hash_E = curve.iterate_points_manual(coords_1 = domain_point)  
 
 curve = EllipticCurve(a, b, p, domain_point)
 alice_priv = 4
