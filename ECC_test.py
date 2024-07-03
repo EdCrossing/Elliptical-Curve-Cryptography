@@ -1,23 +1,16 @@
 from ECC_post_lectures import EllipticCurve
 
-# Define the elliptic curve parameters
 a = 2
 b = 2
 p = 17
 domain_point = (5, 1)
-
-# Create an instance of the EllipticCurve class
 curve = EllipticCurve(a, b, p, domain_point)
 
 # Test functions
-
 def test_point_add():
-    """
-    Test point addition on the elliptic curve.
-    """
     point1 = (3, 16)
     point2 = (5, 1)
-    expected_result = (10, 11)  # Expected result of adding (5, 1) + (5, 1) on the given curve
+    expected_result = (10, 11)  # Expected result of adding (3, 16) + (5, 1) on the given curve
     try:
         result = curve.point_add(point1, point2)
         assert result == expected_result, f"Expected {expected_result}, got {result}"
@@ -26,11 +19,9 @@ def test_point_add():
         print(f"Point addition test failed: {e}")
 
 def test_point_double():
-    """
-    Test point doubling on the elliptic curve.
-    """
+
     point = (9, 16)
-    expected_result = (7, 11)  # Expected result of doubling (5, 1) on the given curve
+    expected_result = (7, 11)  #doubling test
     try:
         result = curve.point_double(point)
         assert result == expected_result, f"Expected {expected_result}, got {result}"
@@ -39,9 +30,6 @@ def test_point_double():
         print(f"Point doubling test failed: {e}")
 
 def test_gen_pubkey():
-    """
-    Test public key generation.
-    """
     prv_key = 10
     expected_pub_key = (7, 11)  # Expected result of multiplying the domain point by 10 on the given curve
     try:
@@ -52,9 +40,6 @@ def test_gen_pubkey():
         print(f"Public key generation test failed: {e}")
 
 def test_gen_shared_secret():
-    """
-    Test shared secret generation.
-    """
     prv_key_a = 5
     prv_key_b = 7
     pub_key_a = curve.gen_pubkey(prv_key_a)
@@ -67,7 +52,7 @@ def test_gen_shared_secret():
     except Exception as e:
         print(f"Shared secret generation test failed: {e}")
 
-# Run tests
+
 if __name__ == "__main__":
     test_point_add()
     test_point_double()
